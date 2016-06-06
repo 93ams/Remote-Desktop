@@ -1,0 +1,19 @@
+{
+  "name": "node-file-manager",
+  "version": "1.0.0",
+  "description": "Simple HTTP based FileSystem with NodeJS",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tilau2328/NFM.git"
+  },
+  "author": "André Stielau",
+  "homepage": "https://github.com/tilau2328/NFM#readme",
+  "dependencies": {
+    "hapi": "^13.4.1",
+    "inert": "^4.0.0"
+  }
+}
