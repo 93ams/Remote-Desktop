@@ -32,7 +32,7 @@ function FilesCtrl($scope, $http) {
     }
 
     $scope.get = function(file){
-        
+
     }
 
     $scope.upload = function(){
@@ -62,7 +62,14 @@ function FilesCtrl($scope, $http) {
     }
 
     $scope.paste = function(){
-
+        switch($scope.clipboard.mode){
+            case "copy":
+                break;
+            case "cut":
+                break;
+            default:
+                break;
+        }
     }
 
     $scope.back = function(){
