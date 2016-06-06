@@ -1,0 +1,24 @@
+<div id="files" class="container">
+    <h1>Files: {{ currentPath }}</h1>
+    <div class="dropdown" ng-repeat="file in files">
+        <button class="btn btn-default dropdown-toggle" id="dropdown-{{$index}}" data-toggle="dropdown">
+            {{ file.name }}
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-{{$index}}">
+            <li role="presentation"><a role="menuitem" class="btn" ng-if="!file.isDirectory" ng-click="get(file)">Get</a></li>
+            <li role="presentation"><a role="menuitem" class="btn" ng-if="file.isDirectory" ng-click="list(file)">Enter</a></li>
+            <li role="presentation"><a role="menuitem" class="btn" ng-click="rename(file)">Rename</a></li>
+            <li role="presentation"><a role="menuitem" class="btn" ng-click="copy(file)">Copy</a></li>
+            <li role="presentation"><a role="menuitem" class="btn" ng-click="cut(file)">Cut</a></li>
+            <li role="presentation"><a role="menuitem" class="btn" ng-click="delete(file)">Delete</a></li>
+        </ul>
+        <p></p>
+    </div>
+    <label class="btn btn-default btn-file" for="files-input">
+        {{ !filesToUpload.length ? "Browse" : "Change" }}
+    </label>
+    <input upload-files="filesToUpload" id="files-input" name='files' type="file" style="display:none" multiple/>
+    <button class="btn btn-default" ng-click="upload()" ng-disabled="!filesToUpload.length">Upload</button>
+    <button class="btn btn-default" ng-click="back()" ng-if="currentPath!='/'" >Back</button>
+</div>

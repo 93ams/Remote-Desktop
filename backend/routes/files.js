@@ -6,14 +6,50 @@ const Path = require("path");
 const Fs = require("fs");
 
 const files_dir = Path.join(__dirname, "..", "files");
-
+// Cria pasta de files, caso não exista
 if(!Fs.existsSync(files_dir)){ Fs.mkdirSync(files_dir); }
 
+// Utils
+
+//Verifica se o caminho tem ".." para evitar porcaria
+const checkForCheating = function(path){
+    var aux = path.split('/');
+    return (aux.indexOf('..') == -1);
+}
+
+// Handlers
+
 const files_handler = function(req, res) {
-    res("get file list");
+    var absolute_path = files_dir;
+    var path = req.query.path || "";
+
+    if(checkForCheating(path))
+        absolute_path = Path.join(files_dir, path);
+
+    Fs.readdir(absolute_path, function (err, files) {
+        if (err) throw err;
+
+        var data = [];
+        files.forEach(function(file){
+            if (Fs.lstatSync(Path.join(absolute_path,file)).isDirectory()) {
+                data.push({ name: file, isDirectory: true, path: path });
+            } else {
+                var ext = Path.extname(file);
+                data.push({ name: file, ext: ext, isDirectory: false, path: path });
+            }
+        });
+        res({ code: 200, files: data });
+    });
 }
 
 const upload_files_handler = function(req, res) {
+    var absolute_path = files_dir;
+    var path = req.query.path || "";
+
+    if(checkForCheating(path)){
+        
+    }
+
     res("upload file");
 }
 
