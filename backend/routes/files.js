@@ -1,3 +1,7 @@
+/*
+    Ficheiro de routes e handlers dos ficheiros dinamicos.
+*/
+
 const Path = require("path");
 const Fs = require("fs");
 
