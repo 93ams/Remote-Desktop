@@ -11,7 +11,6 @@ const files_dir = Path.join(__dirname, "..", "files");
 if(!Fs.existsSync(files_dir)){ Fs.mkdirSync(files_dir); }
 //TODO: buscar settings e criar o resto das pastas de base
 
-
 // Utils
 
 //Verifica se o caminho tem ".." para evitar porcaria
@@ -33,6 +32,30 @@ const rmdir = function(dir_path){
     }
 }
 
+function copy(from_path, to_path) {
+    var target_path = to_path;
+    if (Fs.existsSync(to_path) ) {
+        if (Fs.lstatSync(to_path).isDirectory()) {
+            target_path = Path.join( to, Path.basename(from_path));
+        }
+    }
+    Fs.writeFileSync(target_path, Fs.readFileSync(from_path));
+}
+
+function copyDir(from_path, to_path) {
+    var files = [];
+    var target_path = Path.join(to_path, Path.basename(from_path));
+    if (!Fs.existsSync(target_path)) { Fs.mkdirSync(target_path); }
+
+    if ( Fs.lstatSync(from_path).isDirectory() ) {
+        files = Fs.readdirSync(from_path);
+        files.forEach(function(file) {
+            var current_path = Path.join(from_path, file);
+            if ( Fs.lstatSync(current_path).isDirectory() ) { copyFolderRecursiveSync(current_path, target_path); }
+            else { copy(current_path, target_path); }
+        });
+    }
+}
 // Handlers
 
 const files_handler = function(req, res) {
@@ -62,6 +85,7 @@ const files_handler = function(req, res) {
     }
 }
 
+//TODO: ver se a pasta não desapareceu entretanto
 const upload_files_handler = function(req, res) {
     var absolute_path = files_dir;
     var data = req.payload;
@@ -102,7 +126,9 @@ const rename_files_handler = function(req, res) {
     if(checkForCheating(old_path) && checkForCheating(new_path)){
         old_path = Path.join(absolute_path, old_path);
         new_path = Path.join(absolute_path, new_path);
-        if(Fs.existsSync(new_path)){
+        if(!Fs.existsSync(old_path)){
+            res({ code: 404 });
+        } else if(Fs.existsSync(new_path)){
             res({ code: 409 });
         } else {
             Fs.renameSync(old_path, new_path);
@@ -146,11 +172,54 @@ const get_file_handler = function(req, res) {
 }
 
 const copy_file_handler = function(req, res) {
-    res("copy file");
+    var absolute_path = files_dir;
+    var data = req.payload;
+    var file_name = data.file;
+    var old_path = Path.join(data.from, file_name);
+    var new_path = Path.join(data.to, file_name);
+    if(checkForCheating(old_path) && checkForCheating(new_path)){
+        old_path = Path.join(absolute_path, old_path);
+        new_path = Path.join(absolute_path, new_path);
+        if(!Fs.existsSync(old_path)){
+            res({ code: 404 });
+        } else if(Fs.existsSync(new_path)){
+            res({ code: 409 });
+        } else {
+            var file = { name: file_name, path: data.to };
+            if(Fs.lstatSync(old_path).isDirectory()){
+                copyDir(old_path, new_path);
+                file.isDirectory = true;
+            } else {
+                copy(old_path, new_path);
+                file.isDirectory = false;
+                file.ext = Path.extname(file_name);
+            }
+            res({ code: 200, file: file });
+        }
+    }
 }
 
 const move_file_handler = function(req, res) {
-    res("move file");
+    var absolute_path = files_dir;
+    var data = req.payload;
+    var file_name = data.file;
+    var old_path = Path.join(data.from, file_name);
+    var new_path = Path.join(data.to, file_name);
+    if(checkForCheating(old_path) && checkForCheating(new_path)){
+        old_path = Path.join(absolute_path, old_path);
+        new_path = Path.join(absolute_path, new_path);
+
+        if(!Fs.existsSync(old_path)){
+            res({ code: 404 });
+        } else if(Fs.existsSync(new_path)){
+            res({ code: 409 });
+        } else {
+            var file = { name: file_name, path: data.to, isDirectory: Fs.lstatSync(old_path).isDirectory() };
+            if(!file.isDirectory) { file.ext = Path.extname(file_name); }
+            Fs.renameSync(old_path, new_path);
+            res({ code: 200, file: file });
+        }
+    }
 }
 
 const new_dir_handler = function(req, res) {
@@ -177,7 +246,7 @@ const routes = [{ method: "GET",    path: "/files",          handler: files_hand
                 { method: "DELETE", path: "/files",          handler: delete_files_handler },
                 { method: "GET",    path: "/files/get",      handler: get_file_handler     },
                 { method: "POST",   path: "/files/copy",     handler: copy_file_handler    },
-                { method: "POST",   path: "/files/move",     handler: get_file_handler     },
+                { method: "POST",   path: "/files/move",     handler: move_file_handler     },
                 { method: "POST",   path: "/files/newdir",   handler: new_dir_handler     }];
 
 module.exports = routes;

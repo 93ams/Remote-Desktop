@@ -23,6 +23,7 @@
     </label>
     <input upload-files="filesToUpload" id="files-input" name='files' type="file" style="display:none" multiple/>
     <button class="btn btn-default" ng-click="upload()" ng-disabled="!filesToUpload.length">Upload</button>
-    <button class="btn btn-default" ng-click="back()" ng-if="currentPath!='/'" >Back</button>
+    <button class="btn btn-default" ng-click="paste()" ng-disabled="!clipboard.mode">Paste</button>
     <button class="btn btn-default" ng-click="newDir()" >Create Folder</button>
+    <button class="btn btn-default" ng-click="back()" ng-if="currentPath!='/'" >Back</button>
 </div>
