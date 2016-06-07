@@ -70,12 +70,13 @@ const upload_files_handler = function(req, res) {
     var file = data.file;
     if(file){
         var file_name = file.hapi.filename;
-        if(checkForCheating(path) && checkForCheating(file_name)){
-            var file_path = Path.join(absolute_path, path, file_name);
-            if(Fs.existsSync(file_path) && overwrite == "false"){
+        var file_path = Path.join(path, file_name);
+        if(checkForCheating(file_path)){
+            absolute_path = Path.join(absolute_path, file_path);
+            if(Fs.existsSync(absolute_path) && overwrite == "false"){
                 res({ code: 409, name: file_name });
             } else {
-                var pipe = Fs.createWriteStream(file_path);
+                var pipe = Fs.createWriteStream(absolute_path);
                 pipe.on('error', (err) => {
                     if(err) throw err;
                 });
@@ -92,14 +93,29 @@ const upload_files_handler = function(req, res) {
 }
 
 const rename_files_handler = function(req, res) {
-
+    var absolute_path = files_dir;
+    var data = req.payload;
+    var file_name = data.file;
+    var new_name = data.name;
+    var old_path = Path.join(data.path, file_name);
+    var new_path = Path.join(data.path, new_name);
+    if(checkForCheating(old_path) && checkForCheating(new_path)){
+        old_path = Path.join(absolute_path, old_path);
+        new_path = Path.join(absolute_path, new_path);
+        if(Fs.existsSync(new_path)){
+            res({ code: 409 });
+        } else {
+            Fs.renameSync(old_path, new_path);
+            res({ code: 200 });
+        }
+    }
 }
 
 const delete_files_handler = function(req, res) {
     var path = req.query.path || "";
     var file = req.query.file;
-    if(checkForCheating(path) && checkForCheating(file)){
-        var file_path = Path.join(path, file);
+    var file_path = Path.join(path, file);
+    if(checkForCheating(file_path)){
         var absolute_path = Path.join(files_dir, file_path);
         if (Fs.existsSync(absolute_path)) {
             if(Fs.lstatSync(absolute_path).isDirectory()){ rmdir(absolute_path); }
@@ -114,9 +130,8 @@ const delete_files_handler = function(req, res) {
 const get_file_handler = function(req, res) {
     var path = req.query.path || "";
     var file = req.query.file;
-
-    if(checkForCheating(path) && checkForCheating(file)){
-        var file_path = Path.join(path, file);
+    var file_path = Path.join(path, file);
+    if(checkForCheating(file_path)){
         var absolute_path = Path.join(files_dir, file_path);
         if (Fs.existsSync(absolute_path)) {
             Fs.readFile(absolute_path, function(err, data){
@@ -139,11 +154,25 @@ const move_file_handler = function(req, res) {
 }
 
 const new_dir_handler = function(req, res) {
-    res("new dir");
+    var absolute_path = files_dir;
+    var data = req.payload;
+    var path = data.path || "";
+    var name = data.name;
+    var dir_path = Path.join(path, name);
+    if(checkForCheating(dir_path)){
+        absolute_path = Path.join(absolute_path, dir_path);
+        if(Fs.existsSync(absolute_path)){
+            res({ code: 409 });
+        } else {
+            Fs.mkdirSync(absolute_path);
+            res({ code: 200, file: { name: name, isDirectory: true, path: path } });
+        }
+    }
 }
 
 const routes = [{ method: "GET",    path: "/files",          handler: files_handler        },
-                { method: "POST",   path: "/files",          config: { handler: upload_files_handler, payload: { output: 'stream', parse: true, allow: 'multipart/form-data' } } },
+                { method: "POST",   path: "/files",          config: { handler: upload_files_handler,
+                  payload: { output: 'stream', parse: true, allow: 'multipart/form-data' }}},
                 { method: "PUT",    path: "/files",          handler: rename_files_handler },
                 { method: "DELETE", path: "/files",          handler: delete_files_handler },
                 { method: "GET",    path: "/files/get",      handler: get_file_handler     },

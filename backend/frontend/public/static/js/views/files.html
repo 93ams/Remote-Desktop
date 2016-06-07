@@ -2,6 +2,8 @@
     <h1>Files: {{ currentPath }}</h1>
     <div class="dropdown" ng-repeat="file in files">
         <button class="btn btn-default dropdown-toggle" id="dropdown-{{$index}}" data-toggle="dropdown">
+            <i class="fa fa-folder" aria-hidden="true" ng-if="file.isDirectory"></i>
+            <i class="fa fa-file" aria-hidden="true" ng-if="!file.isDirectory"></i>
             {{ file.name }}
             <span class="caret"></span>
         </button>
@@ -22,5 +24,5 @@
     <input upload-files="filesToUpload" id="files-input" name='files' type="file" style="display:none" multiple/>
     <button class="btn btn-default" ng-click="upload()" ng-disabled="!filesToUpload.length">Upload</button>
     <button class="btn btn-default" ng-click="back()" ng-if="currentPath!='/'" >Back</button>
-    <button class="btn btn-default" ng-click="newDir()" >New Dir</button>
+    <button class="btn btn-default" ng-click="newDir()" >Create Folder</button>
 </div>

@@ -19,6 +19,7 @@ function FilesCtrl($scope, $http, $window) {
     }
 
     function addFile(file){
+        console.log($scope.currentPath + " - " + file.path);
         if(($scope.currentPath == file.path)
         || ($scope.currentPath == "/"
         &&  file.path == "")){
@@ -136,9 +137,17 @@ function FilesCtrl($scope, $http, $window) {
     }
 
     $scope.rename = function(file){
-        var new_name = prompt("Rename: ", file.name);
+        var new_name = prompt((file.isDirectory ? "Directory's" : "File's") + " new name: ", file.name);
         if(new_name){
-            
+            $http.put( "/files", { file: file.name, path: file.path, name: new_name})
+                 .then(function(res){
+                     var data = res.data;
+                     if(data.code == 200){
+                         file.name = new_name;
+                     }
+                 }, function errorCallback(res) {
+                     console.log("error");
+                 });
         }
     }
 
@@ -170,8 +179,19 @@ function FilesCtrl($scope, $http, $window) {
 
     $scope.newDir = function(){
         var dir_name = prompt("New directory's name: ");
+        var path = $scope.currentPath;
+        if(path == "/") { path = ""; }
         if(dir_name){
-
+            console.log(dir_name);
+            $http.post( "/files/newdir", { path: path, name: dir_name })
+                 .then(function(res){
+                     var data = res.data;
+                     if(data.code == 200){
+                         addFile(data.file);
+                     }
+                 }, function errorCallback(res) {
+                     console.log("error");
+                 });
         }
     }
 
