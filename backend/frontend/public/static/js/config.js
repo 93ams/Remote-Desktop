@@ -13,8 +13,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
                     controller  : 'NavCtrl'
                 },
                 'content': {
-                    templateUrl : '/js/views/files.html',
-                    controller  : 'FilesCtrl'
+                    templateUrl : '/js/views/home.html'
                 },
                 'footer': {
                     templateUrl : '/js/views/footer.html',
@@ -39,6 +38,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
             views: {
                 'content@': {
                     templateUrl : '/js/views/books.html'
+                }
+            }
+        }).state('app.files', {
+            url:'/files',
+            views: {
+                'content@': {
+                    templateUrl : '/js/views/files.html',
+                    controller  : 'FilesCtrl'
                 }
             }
         });
