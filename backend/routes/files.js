@@ -85,7 +85,6 @@ const files_handler = function(req, res) {
     }
 }
 
-//TODO: ver se a pasta não desapareceu entretanto
 const upload_files_handler = function(req, res) {
     var absolute_path = files_dir;
     var data = req.payload;
@@ -93,25 +92,29 @@ const upload_files_handler = function(req, res) {
     var overwrite = data.overwrite;
     var file = data.file;
     if(file){
-        var file_name = file.hapi.filename;
-        var file_path = Path.join(path, file_name);
-        if(checkForCheating(file_path)){
-            absolute_path = Path.join(absolute_path, file_path);
-            if(Fs.existsSync(absolute_path) && overwrite == "false"){
-                res({ code: 409, name: file_name });
-            } else {
-                var pipe = Fs.createWriteStream(absolute_path);
-                pipe.on('error', (err) => {
-                    if(err) throw err;
-                });
-                file.pipe(pipe);
-                file.on('end', function (err) {
-                    if(err) throw err;
-                    var ext = Path.extname(file_name);
-                    var response = { name: file_name, ext: ext, isDirectory: false, path: path };
-                    res({ code: 200, file: response });
-                });
+        if(Fs.existsSync(Path.join(absolute_path, path))){
+            var file_name = file.hapi.filename;
+            var file_path = Path.join(path, file_name);
+            if(checkForCheating(file_path)){
+                absolute_path = Path.join(absolute_path, file_path);
+                if(Fs.existsSync(absolute_path) && overwrite == "false"){
+                    res({ code: 409, name: file_name });
+                } else {
+                    var pipe = Fs.createWriteStream(absolute_path);
+                    pipe.on('error', (err) => {
+                        if(err) throw err;
+                    });
+                    file.pipe(pipe);
+                    file.on('end', function (err) {
+                        if(err) throw err;
+                        var ext = Path.extname(file_name);
+                        var response = { name: file_name, ext: ext, isDirectory: false, path: path };
+                        res({ code: 200, file: response });
+                    });
+                }
             }
+        } else {
+            res({ code: 404, file: response });
         }
     }
 }
@@ -126,11 +129,9 @@ const rename_files_handler = function(req, res) {
     if(checkForCheating(old_path) && checkForCheating(new_path)){
         old_path = Path.join(absolute_path, old_path);
         new_path = Path.join(absolute_path, new_path);
-        if(!Fs.existsSync(old_path)){
-            res({ code: 404 });
-        } else if(Fs.existsSync(new_path)){
-            res({ code: 409 });
-        } else {
+        if(!Fs.existsSync(old_path)){ res({ code: 404 }); }
+        else if(Fs.existsSync(new_path)){ res({ code: 409 }); }
+        else {
             Fs.renameSync(old_path, new_path);
             res({ code: 200 });
         }
@@ -147,9 +148,7 @@ const delete_files_handler = function(req, res) {
             if(Fs.lstatSync(absolute_path).isDirectory()){ rmdir(absolute_path); }
             else { Fs.unlinkSync(absolute_path); }
             res({ code: 200, name: file });
-        } else {
-            res({ code: 404 });
-        }
+        } else { res({ code: 404, name: file }); }
     }
 }
 
@@ -230,9 +229,8 @@ const new_dir_handler = function(req, res) {
     var dir_path = Path.join(path, name);
     if(checkForCheating(dir_path)){
         absolute_path = Path.join(absolute_path, dir_path);
-        if(Fs.existsSync(absolute_path)){
-            res({ code: 409 });
-        } else {
+        if(Fs.existsSync(absolute_path)){ res({ code: 409 }); }
+        else {
             Fs.mkdirSync(absolute_path);
             res({ code: 200, file: { name: name, isDirectory: true, path: path } });
         }

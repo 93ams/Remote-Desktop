@@ -48,28 +48,22 @@ function FilesCtrl($scope, $http, $window) {
             if(name){ full_path = path + "/" + name; }
             else { full_path = path; }
         }
-        $http.get( "/files",
-            { params: { "path": full_path || "" } }
-        ).then(function(res) {
+        $http.get( "/files", { params: { "path": full_path || "" } } )
+        .then(function(res) {
             $scope.currentPath = full_path || "/";
             $scope.files = res.data.files;
-        }, function errorCallback(res) {
-            console.log("error");
-        });
+        }, function errorCallback(res) { console.log("error"); });
     }
 
     $scope.get = function(file){
         if(file){
-            $http.get( "/files/get",
-                { params: { "path": file.path, "file": file.name } }
-            ).then(function(res) {
+            $http.get( "/files/get", { params: { "path": file.path, "file": file.name } } )
+            .then(function(res) {
                 var type = res.headers("Content-type");
                 var data = new Blob([res.data], {"type": type});
                 var url = $window.URL || $window.webkitURL;
                 alert(url.createObjectURL(data));
-            }, function errorCallback(res) {
-                console.log("error");
-            });
+            }, function errorCallback(res) { console.log("error"); });
         }
     }
 
@@ -85,10 +79,8 @@ function FilesCtrl($scope, $http, $window) {
                 fd.append("path", path);
                 fd.append("overwrite", "false");
                 fd.append("file", file);
-                $http.post( "/files", fd, {
-                    transformRequest: angular.identity,
-                    headers: {'Content-Type': undefined}
-                }).then(function(res){
+                $http.post( "/files", fd, { transformRequest: angular.identity, headers: {'Content-Type': undefined} })
+                .then(function(res){
                     var data = res.data;
                     switch(data.code){
                         case 200:
@@ -114,30 +106,26 @@ function FilesCtrl($scope, $http, $window) {
                         default:
                             break;
                     }
-                }, function errorCallback(res) {
-                    console.log("error");
-                });
+                }, function errorCallback(res) { console.log("error"); });
             }
             angular.element( document.querySelector( '#files-input' ) )[0].value = "";
         }
     }
 
     $scope.delete = function(file){
-        $http.delete( "/files",
-            { params: { "path": file.path, "file": file.name } }
-        ).then(function(res) {
+        $http.delete( "/files", { params: { "path": file.path, "file": file.name } } )
+        .then(function(res) {
             var data = res.data;
             if(data.code == 200){
-                if(file.path == $scope.clipboard.file.path
-                && file.name == $scope.clipboard.file.name){
+                if( $scope.clipboard.file != null
+                && (file.path == $scope.clipboard.file.path
+                && file.name == $scope.clipboard.file.name)){
                     $scope.clipboard.file = null;
                     $scope.clipboard.mode = null;
                 }
                 removeFile(file);
             }
-        }, function errorCallback(res) {
-            console.log("error");
-        });
+        }, function errorCallback(res) { console.log("error"); });
     }
 
     $scope.rename = function(file){
@@ -146,12 +134,8 @@ function FilesCtrl($scope, $http, $window) {
             $http.put( "/files", { file: file.name, path: file.path, name: new_name})
                  .then(function(res){
                      var data = res.data;
-                     if(data.code == 200){
-                         file.name = new_name;
-                     }
-                 }, function errorCallback(res) {
-                     console.log("error");
-                 });
+                     if(data.code == 200){ file.name = new_name; }
+                 }, function errorCallback(res) { console.log("error"); });
         }
     }
 
@@ -173,93 +157,85 @@ function FilesCtrl($scope, $http, $window) {
             switch($scope.clipboard.mode){
                 case "copy":
                     $http.post( "/files/copy", message)
-                        .then(function(res){
-                            var data = res.data;
-                            switch(data.code){
-                                case 200:
-                                    addFile(data.file);
-                                    break;
-                                case 404:
-                                    alert("It seems that file " + file.name + " is not there anymore");
-                                    $scope.clipboard.file = null;
-                                    $scope.clipboard.mode = null;
-                                    break;
-                                case 409:
-                                    if(confirm("File " + file.name + " already exists at the destination directory, do you want to overwrite it?")){
-                                        message.overwrite = "true";
-                                        $http.post( "/files/copy", message)
-                                            .then(function(res){
-                                                var data = res.data;
-                                                switch(data.code){
-                                                    case 200:
-                                                        removeFile(data.file);
-                                                        addFile(data.file);
-                                                        break;
-                                                    case 404:
-                                                        alert("It seems that file " + file.name + " is not there anymore");
-                                                        $scope.clipboard.file = null;
-                                                        $scope.clipboard.mode = null;
-                                                        break;
-                                                }
-                                            }, function errorCallback(res) {
-                                                console.log("error");
-                                            });
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }, function errorCallback(res) {
-                            console.log("error");
-                        });
+                    .then(function(res){
+                        var data = res.data;
+                        switch(data.code){
+                            case 200:
+                                addFile(data.file);
+                                break;
+                            case 404:
+                                alert("It seems that file " + file.name + " is not there anymore");
+                                $scope.clipboard.file = null;
+                                $scope.clipboard.mode = null;
+                                break;
+                            case 409:
+                                if(confirm("File " + file.name + " already exists at the destination directory, do you want to overwrite it?")){
+                                    message.overwrite = "true";
+                                    $http.post( "/files/copy", message)
+                                    .then(function(res){
+                                        var data = res.data;
+                                        switch(data.code){
+                                            case 200:
+                                                removeFile(data.file);
+                                                addFile(data.file);
+                                                break;
+                                            case 404:
+                                                alert("It seems that file " + file.name + " is not there anymore");
+                                                $scope.clipboard.file = null;
+                                                $scope.clipboard.mode = null;
+                                                break;
+                                        }
+                                    }, function errorCallback(res) { console.log("error"); });
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }, function errorCallback(res) { console.log("error"); });
                     break;
                 case "cut":
                     $http.post( "/files/move", message)
-                        .then(function(res){
-                            var data = res.data;
-                            switch(data.code){
-                                case 200:
-                                    removeFile(file);
-                                    addFile(data.file);
-                                    $scope.clipboard.file = data.file;
-                                    $scope.clipboard.mode = "copy";
-                                    break;
-                                case 404:
-                                    alert("It seems that file " + file.name + " is not there anymore");
-                                    $scope.clipboard.file = null;
-                                    $scope.clipboard.mode = null;
-                                    break;
-                                case 409:
-                                    if(confirm("File " + file.name + " already exists at the destination directory, do you want to overwrite it?")){
-                                        message.overwrite = "true";
-                                        $http.post( "/files/move", message)
-                                            .then(function(res){
-                                                var data = res.data;
-                                                switch(data.code){
-                                                    case 200:
-                                                        removeFile(file);
-                                                        removeFile(data.file);
-                                                        addFile(data.file);
-                                                        $scope.clipboard.file = data.file;
-                                                        $scope.clipboard.mode = "copy";
-                                                        break;
-                                                    case 404:
-                                                        alert("It seems that file " + file.name + " is not there anymore");
-                                                        $scope.clipboard.file = null;
-                                                        $scope.clipboard.mode = null;
-                                                        break;
-                                                }
-                                            }, function errorCallback(res) {
-                                                console.log("error");
-                                            });
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }, function errorCallback(res) {
-                            console.log("error");
-                        });
+                    .then(function(res){
+                        var data = res.data;
+                        switch(data.code){
+                            case 200:
+                                removeFile(file);
+                                addFile(data.file);
+                                $scope.clipboard.file = data.file;
+                                $scope.clipboard.mode = "copy";
+                                break;
+                            case 404:
+                                alert("It seems that file " + file.name + " is not there anymore");
+                                $scope.clipboard.file = null;
+                                $scope.clipboard.mode = null;
+                                break;
+                            case 409:
+                                if(confirm("File " + file.name + " already exists at the destination directory, do you want to overwrite it?")){
+                                    message.overwrite = "true";
+                                    $http.post( "/files/move", message)
+                                    .then(function(res){
+                                        var data = res.data;
+                                        switch(data.code){
+                                            case 200:
+                                                removeFile(file);
+                                                removeFile(data.file);
+                                                addFile(data.file);
+                                                $scope.clipboard.file = data.file;
+                                                $scope.clipboard.mode = "copy";
+                                                break;
+                                            case 404:
+                                                alert("It seems that file " + file.name + " is not there anymore");
+                                                $scope.clipboard.file = null;
+                                                $scope.clipboard.mode = null;
+                                                break;
+                                        }
+                                    }, function errorCallback(res) { console.log("error"); });
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }, function errorCallback(res) { console.log("error"); });
                     break;
                 default:
                     break;
@@ -277,16 +253,11 @@ function FilesCtrl($scope, $http, $window) {
         var path = $scope.currentPath;
         if(path == "/") { path = ""; }
         if(dir_name){
-            console.log(dir_name);
             $http.post( "/files/newdir", { path: path, name: dir_name })
-                 .then(function(res){
-                     var data = res.data;
-                     if(data.code == 200){
-                         addFile(data.file);
-                     }
-                 }, function errorCallback(res) {
-                     console.log("error");
-                 });
+            .then(function(res){
+                var data = res.data;
+                if(data.code == 200){ addFile(data.file); }
+            }, function errorCallback(res) { console.log("error"); });
         }
     }
 
