@@ -2,9 +2,9 @@
 
 var app = app || {};
 
-app.controller('FilesCtrl', ['$scope', '$http', '$window', FilesCtrl]);
+app.controller('FilesCtrl', ['$scope', '$http', '$window', 'FileSaver', FilesCtrl]);
 
-function FilesCtrl($scope, $http, $window) {
+function FilesCtrl($scope, $http, $window, FileSaver) {
     $scope.files = [];
     $scope.filesToUpload = [];
     $scope.currentPath = "/";
@@ -60,9 +60,11 @@ function FilesCtrl($scope, $http, $window) {
             $http.get( "/files/get", { params: { "path": file.path, "file": file.name } } )
             .then(function(res) {
                 var type = res.headers("Content-type");
-                var data = new Blob([res.data], {"type": type});
-                var url = $window.URL || $window.webkitURL;
-                alert(url.createObjectURL(data));
+                var file_name = prompt("Save file as: ", file.name);
+                if(file_name){
+                    var data = new File([res.data], file_name, {"type": type});
+                    FileSaver.saveAs(data, file_name);
+                }
             }, function errorCallback(res) { console.log("error"); });
         }
     }

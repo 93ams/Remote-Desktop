@@ -6,10 +6,16 @@ const Path = require("path");
 const Fs = require("fs");
 const Mime = require("mime");
 
-const files_dir = Path.join(__dirname, "..", "files");
-// Cria pasta de files, caso não exista
-if(!Fs.existsSync(files_dir)){ Fs.mkdirSync(files_dir); }
-//TODO: buscar settings e criar o resto das pastas de base
+const files_config = require(Path.join(__dirname, "..", "config", "files_config.js"));
+
+const init_dirs = function(dir, path) {
+    var dir_path = Path.join(path, dir.name);
+    if(!Fs.existsSync(dir_path)){ Fs.mkdirSync(dir_path); }
+    for(var i = 0; i < dir.dirs.length; i++){ init_dirs(dir.dirs[i], dir_path); }
+}
+
+init_dirs(files_config.base_dirs, Path.join(__dirname, ".."));
+const files_dir = Path.join(__dirname, "..", files_config.base_dirs.name);
 
 // Utils
 
