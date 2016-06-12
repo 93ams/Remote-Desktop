@@ -22,7 +22,7 @@ const files_dir = Path.join(__dirname, "..", files_config.base_dirs.name);
 //Verifica se o caminho tem ".." para evitar porcaria
 const checkForCheating = function(path){
     if(path!=null){
-        var aux = path.split('/');
+        var aux = path.split(Path.sep);
         return (aux.indexOf('..') == -1);
     }
 }
@@ -72,20 +72,26 @@ const files_handler = function(req, res) {
         absolute_path = Path.join(files_dir, path);
 
     if (Fs.existsSync(absolute_path)) {
-        Fs.readdir(absolute_path, function (err, files) {
-            if (err) throw err;
+        if (Fs.lstatSync(absolute_path).isDirectory()) {
+            Fs.readdir(absolute_path, function (err, files) {
+                if (err) throw err;
 
-            var data = [];
-            files.forEach(function(file){
-                if (Fs.lstatSync(Path.join(absolute_path,file)).isDirectory()) {
-                    data.push({ name: file, isDirectory: true, path: path });
-                } else {
-                    var ext = Path.extname(file);
-                    data.push({ name: file, ext: ext, isDirectory: false, path: path });
-                }
+                var data = [];
+                files.forEach(function(file){
+                    if (Fs.lstatSync(Path.join(absolute_path,file)).isDirectory()) {
+                        data.push({ name: file, isDirectory: true, path: path });
+                    } else {
+                        var ext = Path.extname(file);
+                        data.push({ name: file, ext: ext, isDirectory: false, path: path });
+                    }
+                });
+                res({ code: 200, files: data });
             });
-            res({ code: 200, files: data });
-        });
+        } else {
+            var file = Path.basename(path);
+            var ext = Path.extname(path);
+            res({ name: file, ext: ext, isDirectory: false, path: Path.dirname(path) });
+        }
     } else {
         res({ code: 404 });
     }
@@ -160,16 +166,22 @@ const delete_files_handler = function(req, res) {
 
 const get_file_handler = function(req, res) {
     var path = req.query.path || "";
-    var file = req.query.file;
+    var file = req.query.file || "";
     var file_path = Path.join(path, file);
+    console.log("Getting: "+file_path);
     if(checkForCheating(file_path)){
         var absolute_path = Path.join(files_dir, file_path);
+        console.log("Getting: "+absolute_path);
         if (Fs.existsSync(absolute_path)) {
-            Fs.readFile(absolute_path, function(err, data){
-                if(err) throw err;
-                res(data).header('Content-Type', Mime.lookup(file))
-                         .header("Content-Disposition", "attachment; filename=" + file)
-            });
+            if(!Fs.lstatSync(absolute_path).isDirectory()){
+                Fs.readFile(absolute_path, function(err, data){
+                    if(err) throw err;
+                    res(data).header('Content-Type', Mime.lookup(file))
+                             .header("Content-Disposition", "attachment; filename=" + file)
+                });
+            } else {
+                //TODO: zipar e enviar a pasta
+            }
         } else {
             res({ code: 404 });
         }

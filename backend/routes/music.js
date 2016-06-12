@@ -9,25 +9,26 @@ if(!Fs.existsSync(absolute_path)){ Fs.mkdirSync(absolute_path); }
 var bands = {};
 
 const read_file = function(band, album, file){
-    const file_path = Path.join(band, album, file);
+    const album_path = Path.join(band, album);
+    const file_path = Path.join(album_path, file);
     if (!Fs.lstatSync(Path.join(absolute_path, file_path)).isDirectory()) {
         var ext = Path.extname(file);
         if(ext == ".mp3"){
             bands[band].albums[album].songs.push({
-                name: file,
-                path: file_path,
-                number: bands[band].albums[album].songs.length
+                id: bands[band].albums[album].songs.length.toString(),
+                title: file,
+                artist: band,
+                url: "/files/get?path=/Audio/Music/"+album_path+"&file="+file
             });
         } else if(ext == ".png" || ext == ".jpg"){
-            console.log("cover" + ext);
             if(file == ("cover" + ext)){
                 bands[band].albums[album].cover = file_path;
             } else {
-
+                console.log(file);
             }
         }
     } else {
-
+        console.log(file_path);
     }
 }
 
@@ -43,7 +44,7 @@ const read_album = function(band, album){
             files.forEach(function(file){ read_file(band,album,file); });
         });
     } else {
-
+        read_file(band,album);
     }
 }
 
@@ -59,7 +60,7 @@ const read_band = function(band){
             files.forEach(function(file){ read_album(band,file); });
         });
     } else {
-
+        read_file(band);
     }
 }
 
@@ -67,7 +68,6 @@ Fs.readdir(absolute_path, function (err, files) {
     if (err) throw err;
     files.forEach(function(file){ read_band(file); });
 });
-
 
 const bands_handler = function(req, res){
     res(JSON.stringify(bands));
@@ -80,6 +80,15 @@ const band_handler = function(req, res){
     console.log("Band:" + band);
     if(band){
         res(JSON.stringify(band));
+    } else {
+        res({ "code": 404 });
+    }
+}
+
+const get_band_handler = function(req, res){
+    var band = bands[req.params.band];
+    if(band){
+        //TODO: enviar discografia zipada
     } else {
         res({ "code": 404 });
     }
@@ -103,8 +112,21 @@ const album_handler = function(req, res){
     }
 }
 
+const get_album_handler = function(req, res){
+    var band = bands[req.params.band];
+    if(band){
+        var album = band.albums[req.params.album];
+        if(album){
+            //TODO: enviar album
+        } else {
+            res({ "code": 404 });
+        }
+    } else {
+        res({ "code": 404 });
+    }
+}
+
 const song_handler = function(req, res){
-    console.log(req.params);
     var band = bands[req.params.band];
     console.log("Band:" + band);
     if(band){
@@ -128,5 +150,7 @@ const song_handler = function(req, res){
 
 module.exports = [{method: "GET", path: "/music/bands", handler: bands_handler },
                   {method: "GET", path: "/music/bands/{band}", handler: band_handler },
+                  {method: "GET", path: "/music/bands/{band}/get", handler: get_band_handler },
                   {method: "GET", path: "/music/bands/{band}/{album}", handler: album_handler },
+                  {method: "GET", path: "/music/bands/{band}/{album}/get", handler: get_album_handler },
                   {method: "GET", path: "/music/bands/{band}/{album}/{song}", handler: song_handler }];

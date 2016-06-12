@@ -1,3 +1,3 @@
 'use strict';
 
-var app = angular.module('file-manager', ['ui.router', 'ngFileSaver']);
+var app = angular.module('file-manager', ['ui.router', 'ngFileSaver', 'angularSoundManager']);
