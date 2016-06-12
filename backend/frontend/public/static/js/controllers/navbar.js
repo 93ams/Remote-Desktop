@@ -2,7 +2,7 @@
 
 var app = app || {};
 
-app.controller('NavCtrl', NavCtrl);
+app.controller('NavCtrl', ['$scope', NavCtrl]);
 
 function NavCtrl($scope) {
 

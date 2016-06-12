@@ -1,3 +1,5 @@
+require("./database_connect");
+
 const Hapi = require("hapi");
 const Inert = require('inert');
 

@@ -10,3 +10,8 @@ body {
    width:100%;
    background:#999;
 }
+
+.cover > img {
+    max-width: 120px;
+    max-height: 120px;
+}

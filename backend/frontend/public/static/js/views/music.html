@@ -1,3 +1,26 @@
 <div id="music" class="container">
     <h1>Music</h1>
+    <ul class="media-list">
+        <li ng-repeat="band in bands" class="media">
+            <h1 class="media-heading">{{ band.name }}</h1>
+            <ul class="media-list">
+                <li ng-repeat="album in band.albums" class="media">
+                    <div class="media-left cover">
+                        <img class="media-object" ng-src=/files/get?file=Audio/Music/{{album.cover}} alt="{{album.name}}-cover">
+                    </div>
+                    <div class="media-body">
+                        <h3 class="media-heading">{{ album.name }}</h3>
+                        <ul class="media-list">
+                            <li ng-repeat="song in album.songs" class="media">
+                                <p class="media-heading">
+                                    {{ song.name }}
+                                    <button class="btn" ng-click="getSong(band.name,album.name,song.number)"><i class="fa fa-play fa-lg" aria-hidden="true"></i></button>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
 </div>

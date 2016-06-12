@@ -23,7 +23,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
             url:'/music',
             views: {
                 'content@': {
-                    templateUrl : '/js/views/music.html'
+                    templateUrl : '/js/views/music.html',
+                    controller: 'MusicCtrl'
                 }
             }
         }).state('app.movies', {
