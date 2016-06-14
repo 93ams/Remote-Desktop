@@ -1,0 +1,24 @@
+<li class="dropdown">
+    <a class="dropdown-toggle btn" data-toggle="dropdown" role="button"
+        aria-haspopup="true" aria-expanded="false" ng-if="!logged">
+        Login <span class="caret"></span>
+    </a>
+    <a class="btn" ng-if="logged" ng-click="logout()">Logout</a>
+    <ul class="dropdown-menu">
+        <form class="navbar-form">
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="username" placeholder="Username"><br/>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" ng-model="password" placeholder="Password">
+            </div>
+            <li role="separator" class="divider"></li>
+            <div class="form-group">
+                <button ng-click="login()" class="btn btn-default">Login</button>
+            </div>
+            <div class="form-group">
+                <a ui-sref="app.register" class="btn btn-default">Register</a>
+            </div>
+        </form>
+    </ul>
+</li>

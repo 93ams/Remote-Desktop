@@ -2,8 +2,11 @@
 
 var app = app || {};
 
-app.controller('NavCtrl', ['$scope', NavCtrl]);
+function NavCtrl($scope, $state) {
+    var states = $state.get();
+    $scope.divs = states.slice(2, states.length);
 
-function NavCtrl($scope) {
-
+    $scope.user = null;
 }
+
+app.controller('NavCtrl', ["$scope", "$state", NavCtrl]);

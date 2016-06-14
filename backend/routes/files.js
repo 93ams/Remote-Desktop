@@ -168,7 +168,6 @@ const get_file_handler = function(req, res) {
     var path = req.query.path || "";
     var file = req.query.file || "";
     var file_path = Path.join(path, file);
-    console.log("Getting: "+file_path);
     if(checkForCheating(file_path)){
         var absolute_path = Path.join(files_dir, file_path);
         console.log("Getting: "+absolute_path);

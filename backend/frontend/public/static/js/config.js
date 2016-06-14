@@ -19,8 +19,18 @@ app.config(function($stateProvider, $urlRouterProvider) {
                     templateUrl : '/js/views/footer.html',
                 }
             }
+        }).state('app.files', {
+            url:'/files',
+            data: { name: "Files" },
+            views: {
+                'content@': {
+                    templateUrl : '/js/views/files.html',
+                    controller  : 'FilesCtrl'
+                }
+            }
         }).state('app.music', {
             url:'/music',
+            data: { name: "Music" },
             views: {
                 'content@': {
                     templateUrl : '/js/views/music.html',
@@ -29,6 +39,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         }).state('app.movies', {
             url:'/movies',
+            data: { name: "Movies" },
             views: {
                 'content@': {
                     templateUrl : '/js/views/movies.html'
@@ -36,17 +47,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         }).state('app.books', {
             url:'/books',
+            data: { name: "Books" },
             views: {
                 'content@': {
                     templateUrl : '/js/views/books.html'
-                }
-            }
-        }).state('app.files', {
-            url:'/files',
-            views: {
-                'content@': {
-                    templateUrl : '/js/views/files.html',
-                    controller  : 'FilesCtrl'
                 }
             }
         });
